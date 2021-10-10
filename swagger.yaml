@@ -1,0 +1,377 @@
+openapi: 3.0.1
+info:
+  title: ""
+  description: ""
+  version: "1"
+servers:
+- url: https://virtserver.swaggerhub.com/3_heroes/Laba_5/1
+tags:
+- name: auto
+  description: auto
+- name: clients
+  description: all us clients
+- name: balance
+  description: balance
+paths:
+  /auto:
+    get:
+      tags:
+      - auto
+      operationId: login
+      responses:
+        200:
+          description: Log In
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/Token'
+      security:
+      - Basic: []
+    post:
+      tags:
+      - auto
+      operationId: signup
+      requestBody:
+        description: New User
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/Client'
+        required: true
+      responses:
+        200:
+          description: Client created
+          content: {}
+      x-codegen-request-body-name: user
+    x-swagger-router-controller: auth-controller
+  /clients:
+    get:
+      tags:
+      - clients
+      description: returns all registered clients
+      operationId: getClients
+      parameters:
+      - name: limit
+        in: query
+        description: max number of records to return
+        schema:
+          type: integer
+          format: int32
+      responses:
+        200:
+          description: All clients
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  type: string
+    post:
+      tags:
+      - clients
+      summary: Create client
+      description: This can only be done by the logged in user.
+      operationId: createClient
+      requestBody:
+        description: Created client object
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/Client'
+        required: true
+      responses:
+        default:
+          description: successful operation
+          content: {}
+      x-codegen-request-body-name: body
+  /clients/{id}:
+    get:
+      tags:
+      - clients
+      summary: Get client by user id
+      operationId: getUserById
+      parameters:
+      - name: id
+        in: path
+        description: The name that needs to be fetched. Use user1 for testing.
+        required: true
+        schema:
+          type: string
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Client'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Client'
+        400:
+          description: Invalid id supplied
+          content: {}
+        404:
+          description: User not found
+          content: {}
+      security:
+      - JWT: []
+    put:
+      tags:
+      - clients
+      summary: Updated client
+      description: This can only be done by the logged in client.
+      operationId: updateClient
+      parameters:
+      - name: id
+        in: path
+        description: name that need to be updated
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: Updated user object
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/Client'
+        required: true
+      responses:
+        400:
+          description: Invalid user supplied
+          content: {}
+        404:
+          description: User not found
+          content: {}
+      security:
+      - JWT: []
+      x-codegen-request-body-name: body
+    delete:
+      tags:
+      - clients
+      summary: Delete client
+      description: This can only be done by the logged in client.
+      operationId: deleteClient
+      parameters:
+      - name: id
+        in: path
+        description: The id that needs to be deleted
+        required: true
+        schema:
+          type: string
+      responses:
+        400:
+          description: Invalid id supplied
+          content: {}
+        404:
+          description: User not found
+          content: {}
+      security:
+      - JWT: []
+  /credits:
+    get:
+      tags:
+      - credits
+      description: returns all registered credit
+      operationId: getAllCredits
+      parameters:
+      - name: limit
+        in: query
+        description: max number of credit to return
+        schema:
+          type: integer
+          format: int32
+      responses:
+        200:
+          description: All credit
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  type: string
+    post:
+      tags:
+      - credits
+      operationId: register
+      requestBody:
+        description: Created credit object
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/Credit'
+        required: true
+      responses:
+        default:
+          description: successful operation
+          content: {}
+      security:
+      - JWT: []
+      x-codegen-request-body-name: body
+  /credits/{id_credit}:
+    get:
+      tags:
+      - credits
+      summary: Get credit by user id
+      operationId: getCreditById
+      parameters:
+      - name: id_credit
+        in: path
+        description: The credit that needs to be fetched
+        required: true
+        schema:
+          type: string
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Credit'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Credit'
+        400:
+          description: Invalid id supplied
+          content: {}
+        404:
+          description: Credit not found
+          content: {}
+      security:
+      - JWT: []
+    delete:
+      tags:
+      - credits
+      summary: Delete client
+      description: This can only be done by the logged in client.
+      operationId: deleteCredit
+      parameters:
+      - name: id_credit
+        in: path
+        description: The id that needs to be deleted
+        required: true
+        schema:
+          type: string
+      responses:
+        400:
+          description: Invalid id supplied
+          content: {}
+        404:
+          description: Credit not found
+          content: {}
+      security:
+      - JWT: []
+  /balance:
+    get:
+      tags:
+      - balance
+      description: return balance
+      operationId: getBalance
+      parameters:
+      - name: balance
+        in: query
+        description: all balance
+        schema:
+          type: integer
+          format: int64
+      responses:
+        200:
+          description: All balance
+          content:
+            '*/*':
+              schema:
+                type: integer
+                format: int64
+    put:
+      tags:
+      - balance
+      summary: Updated balacne
+      description: Updated balacne
+      operationId: updateBalance
+      parameters:
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        description: Updated user object
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/Balance'
+        required: true
+      responses:
+        400:
+          description: Invalid user supplied
+          content: {}
+        404:
+          description: User not found
+          content: {}
+      x-codegen-request-body-name: body
+components:
+  schemas:
+    Credit:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        id_borrower:
+          type: integer
+          format: int64
+        loan_status:
+          type: boolean
+        loan_date:
+          type: string
+          format: data
+        loan_amount:
+          type: integer
+          format: int64
+    Client:
+      required:
+      - password
+      - username
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        username:
+          type: string
+        password:
+          type: string
+          format: password
+        clientName:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        clientStatus:
+          type: integer
+          description: Client Status
+          format: int32
+    Token:
+      required:
+      - token
+      - user
+      type: object
+      properties:
+        user:
+          type: string
+        token:
+          type: string
+    Balance:
+      type: object
+      properties:
+        balance:
+          type: integer
+          format: int64
+  securitySchemes:
+    Basic:
+      type: http
+      scheme: basic
+    JWT:
+      type: apiKey
+      name: Authorization
+      in: header
