@@ -1,0 +1,408 @@
+openapi: 3.0.1
+info:
+  title: "Bank"
+  description: ""
+  version: "1"
+servers:
+- url: https://virtserver.swaggerhub.com/3_heroes/Laba_5/1
+tags:
+- name: Users
+  description: All users
+- name: Credit
+  description: bank`s manager
+paths:
+  /Users:
+    post:
+      tags:
+        - Users
+      summary: Create user
+      description: This can only be done by the logged in user.
+      operationId: createUser
+      responses:
+        default:
+          description: successful operation
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+        description: Created user object
+        required: true
+  /user/login:
+    get:
+      tags:
+        - Users
+      summary: Logs user into the system
+      operationId: loginUser
+      parameters:
+        - name: username
+          in: query
+          description: The user name for login
+          required: true
+          schema:
+            type: string
+        - name: password
+          in: query
+          description: The password for login in clear text
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: string
+            application/xml:
+              schema:
+                type: string
+        '400':
+          description: Invalid username/password supplied
+  /user/logout:
+    get:
+      tags:
+        - Users
+      summary: Logs out current logged in user session
+      operationId: logoutUser
+      responses:
+        default:
+          description: successful operation
+  /user/{username}:
+    get:
+      tags:
+        - Users
+      summary: Get user by user name
+      operationId: getUserByName
+      parameters:
+        - name: username
+          in: path
+          description: The name that needs to be fetched.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Invalid username supplied
+        '404':
+          description: User not found
+      security:
+        - User_api_key: []
+    put:
+      tags:
+        - Users
+      summary: Updated user
+      description: This can only be done by the logged in user.
+      operationId: updateUser
+      parameters:
+        - name: username
+          in: path
+          description: name that need to be updated
+          required: true
+          schema:
+            type: string
+      responses:
+        '400':
+          description: Invalid user supplied
+        '404':
+          description: User not found
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+        description: Updated user object
+        required: true
+      security:
+        - User_api_key: []
+    delete:
+      tags:
+        - Users
+      summary: Delete user
+      description: This can only be done by the logged in user.
+      operationId: deleteUser
+      parameters:
+        - name: username
+          in: path
+          description: The name that needs to be deleted
+          required: true
+          schema:
+            type: string
+      responses:
+        '400':
+          description: Invalid username supplied
+        '404':
+          description: User not found
+      security:
+        - User_api_key: []
+  /Users/{username}/credits:
+    post:
+      tags:
+      - Users
+      summary: Create credit
+      description: Create credit by user
+      operationId: register
+      parameters:
+      - name: username
+        in: path
+        description: The credit that needs to be fetched
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: Created credit object
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/Credit'
+        required: true
+      responses:
+        default:
+          description: successful operation
+      security:
+      - User_api_key: []
+  /Users/{username}/credits/{id_credit}:
+    get:
+      tags:
+      - Users
+      summary: Get credit by user id
+      operationId: getCreditById
+      parameters:
+      - name: username
+        in: path
+        description: The credit that needs to be fetched
+        required: true
+        schema:
+          type: string
+      - name: id_credit
+        in: path
+        description: The credit that needs to be fetched
+        required: true
+        schema:
+          type: string
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Credit'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Credit'
+        400:
+          description: Invalid id supplied
+        404:
+          description: Credit not found
+      security:
+      - User_api_key: []
+
+  /manager/{username}/credits/{id_credit}:
+    put:
+      tags:
+      - Credit
+      summary: Put client`s credit
+      description: This can only be done by the logged in client.
+      operationId: PutCredit
+      parameters:
+      - name: username
+        in: path
+        description: The credit that needs to be fetched
+        required: true
+        schema:
+          type: string
+      - name: id_credit
+        in: path
+        description: The id that needs to be deleted
+        required: true
+        schema:
+          type: string
+      responses:
+        400:
+          description: Invalid id supplied
+        404:
+          description: Credit not found
+      security:
+      - Manager_api_key: []
+  /manager/balance:
+    get:
+      tags:
+      - Credit
+      summary: Return balance
+      description: return balance
+      operationId: getBalance
+      parameters:
+      - name: balance
+        in: query
+        description: all balance
+        schema:
+          type: integer
+          format: int64
+      responses:
+        200:
+          description: All balance
+          content:
+            '*/*':
+              schema:
+                type: integer
+                format: int64
+      security:
+        - Manager_api_key: []
+    put:
+      tags:
+        - Credit
+      summary: Updated balacne
+      description: Updated balacne
+      operationId: updateBalance
+      parameters:
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        description: Updated user object
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/Balance'
+        required: true
+      responses:
+        400:
+          description: Invalid user supplied
+          content: {}
+        404:
+          description: User not found
+          content: {}
+      security:
+        - Manager_api_key: []
+  /manager/Users:
+    get:
+      tags:
+      - Credit
+      description: returns all registered clients
+      operationId: getClients
+      parameters:
+      - name: limit
+        in: query
+        description: max number of records to return
+        schema:
+          type: integer
+          format: int32
+      responses:
+        200:
+          description: All clients
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  type: string
+      security:
+       - Manager_api_key: []
+  /manager/credits:
+    get:
+      tags:
+      - Credit
+      description: returns all registered credit
+      operationId: getAllCredits
+      parameters:
+      - name: limit
+        in: query
+        description: max number of credit to return
+        schema:
+          type: integer
+          format: int32
+      responses:
+        200:
+          description: All credit
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  type: string
+      security:
+        - Manager_api_key: []
+
+components:
+  schemas:
+    Credit:
+      required:
+      - id_borrower
+      - loan_date
+      - loan_amount
+      - interest_rate
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        id_borrower:
+          type: integer
+          format: int64
+        loan_status:
+          type: boolean
+          default: False
+        loan_date:
+          type: string
+          format: data
+        loan_amount:
+          type: integer
+          format: int64
+        interest_rate:
+          type: integer
+          format: int64
+          minimum: 0
+          maximum: 30
+    User:
+      required:
+      - password
+      - username
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        username:
+          type: string
+        password:
+          type: string
+          format: password
+        clientName:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        status:
+          type: string
+          description: User Status
+          enum:
+            - user
+            - manager
+    Balance:
+      type: object
+      properties:
+        balance:
+          type: integer
+          format: int64
+          default: 517000
+  securitySchemes:
+    User_api_key:
+      type: apiKey
+      name: User_api_key
+      in: header
+    Manager_api_key:
+      type: apiKey
+      name: Manager_api_key
+      in: header
