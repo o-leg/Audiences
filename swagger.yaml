@@ -1,377 +1,458 @@
-openapi: 3.0.1
+openapi: 3.0.0
 info:
-  title: ""
-  description: ""
-  version: "1"
+  version: '1'
+  title: 'Reserving audiences'
+  description: 'service for reserving audiences'
 servers:
-- url: https://virtserver.swaggerhub.com/3_heroes/Laba_5/1
+    - url: https://virtserver.swaggerhub.com/3_heroes/laba5/1
 tags:
-- name: auto
-  description: auto
-- name: clients
-  description: all us clients
-- name: balance
-  description: balance
-paths:
-  /auto:
-    get:
-      tags:
-      - auto
-      operationId: login
-      responses:
-        200:
-          description: Log In
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/Token'
-      security:
-      - Basic: []
+  - name: audiens
+    description: Everything about audiens
+  - name: user
+    description: User operations
+paths: 
+  /audiens:
     post:
       tags:
-      - auto
-      operationId: signup
+        - audiens
+      summary: Add a new audience
+      operationId: addAudiens
+      responses:
+        '405':
+          description: Invalid input
       requestBody:
-        description: New User
-        content:
-          '*/*':
-            schema:
-              $ref: '#/components/schemas/Client'
-        required: true
-      responses:
-        200:
-          description: Client created
-          content: {}
-      x-codegen-request-body-name: user
-    x-swagger-router-controller: auth-controller
-  /clients:
+        $ref: '#/components/requestBodies/audiens'
+      security:
+        - manager_api_key: []
+  /audiens/{id}: 
     get:
       tags:
-      - clients
-      description: returns all registered clients
-      operationId: getClients
-      parameters:
-      - name: limit
-        in: query
-        description: max number of records to return
-        schema:
-          type: integer
-          format: int32
+        - audiens
+      summary: Find audiens by id
+      description: Returns a single audien
+      operationId: getAudiensById
+      parameters: 
+        - name: id
+          in: path
+          description: Id of audiens to return
+          required: true
+          schema:
+            type: integer
+            format: int64
       responses:
-        200:
-          description: All clients
+        '200':
+          description: successful operation
           content:
-            '*/*':
+            application/json:
               schema:
-                type: array
-                items:
-                  type: string
+                $ref: '#/components/schemas/Audient'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Audient'
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Audient not found
+      security:
+        - manager_api_key: []
+    put:
+      tags:
+        - audiens
+      summary: Update an existing audiens
+      operationId: updateAud
+      parameters: 
+        - name: id
+          in: path
+          description: id that need to be updated
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Audiens not found
+        '405':
+          description: Validation exception
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Audient'
+        description: Updated audient object
+        required: true
+      security:
+        - manager_api_key: []
+    delete:
+      tags:
+        - audiens
+      summary: Delete audiens
+      operationId: deletePet
+      parameters:
+        - name: id
+          in: path
+          description: audiens id to delete
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Audiens not found
+      security:
+        - manager_api_key: []
+  /user:
     post:
       tags:
-      - clients
-      summary: Create client
+        - user
+      summary: Create user
       description: This can only be done by the logged in user.
-      operationId: createClient
-      requestBody:
-        description: Created client object
-        content:
-          '*/*':
-            schema:
-              $ref: '#/components/schemas/Client'
-        required: true
+      operationId: createUser
       responses:
         default:
           description: successful operation
-          content: {}
-      x-codegen-request-body-name: body
-  /clients/{id}:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+        description: Created user object
+        required: true
+  /user/login:
     get:
       tags:
-      - clients
-      summary: Get client by user id
-      operationId: getUserById
+        - user
+      summary: Logs user into the system
+      operationId: loginUser
       parameters:
-      - name: id
-        in: path
-        description: The name that needs to be fetched. Use user1 for testing.
-        required: true
-        schema:
-          type: string
+        - name: username
+          in: query
+          description: The user name for login
+          required: true
+          schema:
+            type: string
+        - name: password
+          in: query
+          description: The password for login in clear text
+          required: true
+          schema:
+            type: string
       responses:
-        200:
+        '200':
           description: successful operation
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Client'
+                type: string
             application/xml:
               schema:
-                $ref: '#/components/schemas/Client'
-        400:
-          description: Invalid id supplied
-          content: {}
-        404:
-          description: User not found
-          content: {}
-      security:
-      - JWT: []
-    put:
-      tags:
-      - clients
-      summary: Updated client
-      description: This can only be done by the logged in client.
-      operationId: updateClient
-      parameters:
-      - name: id
-        in: path
-        description: name that need to be updated
-        required: true
-        schema:
-          type: string
-      requestBody:
-        description: Updated user object
-        content:
-          '*/*':
-            schema:
-              $ref: '#/components/schemas/Client'
-        required: true
-      responses:
-        400:
-          description: Invalid user supplied
-          content: {}
-        404:
-          description: User not found
-          content: {}
-      security:
-      - JWT: []
-      x-codegen-request-body-name: body
-    delete:
-      tags:
-      - clients
-      summary: Delete client
-      description: This can only be done by the logged in client.
-      operationId: deleteClient
-      parameters:
-      - name: id
-        in: path
-        description: The id that needs to be deleted
-        required: true
-        schema:
-          type: string
-      responses:
-        400:
-          description: Invalid id supplied
-          content: {}
-        404:
-          description: User not found
-          content: {}
-      security:
-      - JWT: []
-  /credits:
+                type: string
+        '400':
+          description: Invalid username/password supplied
+  /user/logout:
     get:
       tags:
-      - credits
-      description: returns all registered credit
-      operationId: getAllCredits
-      parameters:
-      - name: limit
-        in: query
-        description: max number of credit to return
-        schema:
-          type: integer
-          format: int32
+        - user
+      summary: Logs out current logged in user session
+      operationId: logoutUser
       responses:
-        200:
-          description: All credit
+        default:
+          description: successful operation
+  /user/{username}:
+    get:
+      tags:
+        - user
+      summary: Get user by user name
+      operationId: getUserByName
+      parameters:
+        - name: username
+          in: path
+          description: The name that needs to be fetched.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
           content:
-            '*/*':
+            application/json:
               schema:
-                type: array
-                items:
-                  type: string
+                $ref: '#/components/schemas/User'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Invalid username supplied
+        '404':
+          description: User not found
+      security:
+        - user_api_key: []
+    put:
+      tags:
+        - user
+      summary: Updated user
+      description: This can only be done by the logged in user.
+      operationId: updateUser
+      parameters:
+        - name: username
+          in: path
+          description: name that need to be updated
+          required: true
+          schema:
+            type: string
+      responses:
+        '400':
+          description: Invalid user supplied
+        '404':
+          description: User not found
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+        description: Updated user object
+        required: true
+      security:
+        - user_api_key: []
+    delete:
+      tags:
+        - user
+      summary: Delete user
+      description: This can only be done by the logged in user.
+      operationId: deleteUser
+      parameters:
+        - name: username
+          in: path
+          description: The name that needs to be deleted
+          required: true
+          schema:
+            type: string
+      responses:
+        '400':
+          description: Invalid username supplied
+        '404':
+          description: User not found
+      security:
+        - user_api_key: []
+  /requests/{username}:
     post:
       tags:
-      - credits
-      operationId: register
-      requestBody:
-        description: Created credit object
-        content:
-          '*/*':
-            schema:
-              $ref: '#/components/schemas/Credit'
-        required: true
-      responses:
-        default:
-          description: successful operation
-          content: {}
-      security:
-      - JWT: []
-      x-codegen-request-body-name: body
-  /credits/{id_credit}:
-    get:
-      tags:
-      - credits
-      summary: Get credit by user id
-      operationId: getCreditById
+        - request
+      summary: Place an order for a audience
+      operationId: placeOrder
       parameters:
-      - name: id_credit
-        in: path
-        description: The credit that needs to be fetched
-        required: true
-        schema:
-          type: string
+        - name: username
+          in: path
+          description: The name of tenant
+          required: true
+          schema:
+            type: string
       responses:
-        200:
+        '200':
           description: successful operation
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Credit'
+                $ref: '#/components/schemas/Request'
             application/xml:
               schema:
-                $ref: '#/components/schemas/Credit'
-        400:
-          description: Invalid id supplied
-          content: {}
-        404:
-          description: Credit not found
-          content: {}
-      security:
-      - JWT: []
-    delete:
-      tags:
-      - credits
-      summary: Delete client
-      description: This can only be done by the logged in client.
-      operationId: deleteCredit
-      parameters:
-      - name: id_credit
-        in: path
-        description: The id that needs to be deleted
+                $ref: '#/components/schemas/Request'
+        '400':
+          description: Invalid Order
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Request'
+        description: placed an order for the lease of the audience
         required: true
-        schema:
-          type: string
-      responses:
-        400:
-          description: Invalid id supplied
-          content: {}
-        404:
-          description: Credit not found
-          content: {}
       security:
-      - JWT: []
-  /balance:
+        - user_api_key: []
+  /requests/{RequestId}:
     get:
-      tags:
-      - balance
-      description: return balance
-      operationId: getBalance
+      tags: 
+      - request
+      summary: Find Request by ID
+      operationId: getRequestById
       parameters:
-      - name: balance
-        in: query
-        description: all balance
-        schema:
-          type: integer
-          format: int64
+        - name: RequestId
+          in: path
+          description: ID of Request that needs to be founded
+          required: true
+          schema:
+            type: integer
+            format: int64
       responses:
-        200:
-          description: All balance
+        '200':
+          description: successful operation
           content:
-            '*/*':
+            application/json:
               schema:
-                type: integer
-                format: int64
+                $ref: '#/components/schemas/Request'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Request'
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Request not found
+      security:
+        - user_api_key: []
     put:
       tags:
-      - balance
-      summary: Updated balacne
-      description: Updated balacne
-      operationId: updateBalance
+        - request
+      summary: Updated request
+      description: This can only be done by the logged in user.
+      operationId: updateRequest
       parameters:
-      - name: limit
-        in: query
-        schema:
-          type: integer
-          format: int64
-      requestBody:
-        description: Updated user object
-        content:
-          '*/*':
-            schema:
-              $ref: '#/components/schemas/Balance'
-        required: true
+        - name: RequestId
+          in: path
+          description: ID of Request that needs to be founded
+          required: true
+          schema:
+            type: integer
+            format: int64
       responses:
-        400:
+        '400':
           description: Invalid user supplied
-          content: {}
-        404:
+        '404':
           description: User not found
-          content: {}
-      x-codegen-request-body-name: body
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Request'
+        description: Updated user object
+        required: true
+      security:
+        - user_api_key: []
+    delete:
+      tags:
+        - request
+      summary: Delete request
+      description: This can only be done by the logged in user.
+      operationId: deleteRequest
+      parameters:
+        - name: RequestId
+          in: path
+          description: ID of Request that needs to be founded
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '400':
+          description: Invalid requestId supplied
+        '404':
+          description: Requsest not found
+      security:
+        - user_api_key: []
 components:
   schemas:
-    Credit:
+    Request:
       type: object
-      properties:
-        id:
-          type: integer
-          format: int64
-        id_borrower:
-          type: integer
-          format: int64
-        loan_status:
-          type: boolean
-        loan_date:
-          type: string
-          format: data
-        loan_amount:
-          type: integer
-          format: int64
-    Client:
       required:
-      - password
-      - username
+        - username
+        - AudiensId
+        - Lease_start_date
+        - Number_of_hours
+      properties:
+        RequestId:
+          type: integer
+          format: int64
+        username:
+          type: string
+        AudiensId:
+          type: integer
+          format: int64
+        Lease_start_date:
+          type: string
+          format: date-time
+        Number_of_hours:
+          type: integer
+          format: int64
+          minimum: 1
+          maximum: 120 
+        status:
+          type: string
+          description: Order Status
+          enum:
+            - approved
+            - disapproved
+            - considered
+        complete:
+          type: boolean
+          default: false
+      xml:
+        name: Request
+    User:
       type: object
+      required:
+        - username
+        - password
       properties:
         id:
           type: integer
           format: int64
         username:
           type: string
-        password:
-          type: string
-          format: password
-        clientName:
-          type: string
         firstName:
           type: string
         lastName:
           type: string
-        clientStatus:
+        email:
+          type: string
+        password:
+          type: string
+        phone:
+          type: string
+        userStatus:
           type: integer
-          description: Client Status
           format: int32
-    Token:
+          description: User Status
+      xml:
+        name: User
+    Audient:
+      type: object
       required:
-      - token
-      - user
-      type: object
+        - name
+        - address
+        - size
+        - price
       properties:
-        user:
-          type: string
-        token:
-          type: string
-    Balance:
-      type: object
-      properties:
-        balance:
+        id:
           type: integer
           format: int64
+        name: 
+          type: string
+        address:
+          type: string
+        size:
+          type: integer
+          format: int64
+        price:
+          type: integer
+          format: int64
+  requestBodies:
+    audiens:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Audient'
+        application/xml:
+          schema:
+            $ref: '#/components/schemas/Audient'
+      description: add new audiens
+      required: true
   securitySchemes:
-    Basic:
-      type: http
-      scheme: basic
-    JWT:
+    manager_api_key:
       type: apiKey
-      name: Authorization
+      name: manager_api_key
+      in: header
+    user_api_key:
+      type: apiKey
+      name: user_api_key
       in: header
