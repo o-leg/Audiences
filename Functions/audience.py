@@ -86,13 +86,15 @@ def update_audience(audienceId):
     if not db_audience:
         return Response(status=404, response='An audience with provided ID was not found.')
 
-    # Check if audience with such number already exists
-    if 'number' in data.keys():
-        exists = session.query(Audience.id).filter_by(number=data['number']).first()
-        if exists:
-            return Response(status=400, response='Audience with such number already exists.')
-        db_audience.number = data['number']
+    # # Check if audience with such number already exists
+    # if 'number' in data.keys():
+    #     exists = session.query(Audience.id).filter_by(number=data['number']).first()
+    #     if exists:
+    #         return Response(status=400, response='Audience with such number already exists.')
+    #     db_audience.number = data['number']
     # Change audience data
+    if 'number' in data.keys():
+        db_audience.number = data['number']
     if 'amount_of_places' in data.keys():
         db_audience.amount_of_places = data['amount_of_places']
     if 'status' in data.keys():

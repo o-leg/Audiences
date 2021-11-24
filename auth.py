@@ -1,12 +1,16 @@
 from flask import Blueprint, Response, request, jsonify
 from marshmallow import ValidationError
-from flask_bcrypt import Bcrypt
+
+from passlib.hash import bcrypt
+
+#from flask_bcrypt import Bcrypt
+
 from models import User, Session
 from validation_schemas import UserSchema
 
-
 auth = Blueprint('auth', __name__)
-bcrypt = Bcrypt()
+
+#bcrypt = Bcrypt()
 
 session = Session()
 
@@ -29,7 +33,7 @@ def register():
         return Response(status=400, response='User with such username already exists.')
 
     # Hash user's password
-    #hashed_password = bcrypt.generate_password_hash(data['password'])
+    hashed_password = bcrypt.generate_password_hash(data['password'])
     # Create new user
     new_user = User(name=data['name'], surname=data['surname'], username=data['username'], password=hashed_password)
 

@@ -2,7 +2,7 @@ from flask import Response, request, jsonify, Blueprint
 from marshmallow import ValidationError
 from datetime import datetime
 from models import Reservation, User, Audience, Session
-from validation_schemas import ReservatiobSchema
+from validation_schemas import ReservationSchema
 
 reservation = Blueprint('reservation', __name__)
 
@@ -17,7 +17,7 @@ def create_reservation():
 
     # Validate input data
     try:
-        ReservatiobSchema().load(data)
+        ReservationSchema().load(data)
     except ValidationError as err:
         return jsonify(err.messages), 400
 
@@ -36,27 +36,27 @@ def create_reservation():
 
     # Compare if end date is bigger than start date
     if d1 > d2:
-        return Response(status=400, response="Invalid dates input.")
+        return Response(status=400, response="Invalid dates input. d1 > d2")
 
     # Check if user wants to reserve audience for allowed period of time
     diff = d2 - d1
     if (diff.total_seconds() / 3600) < 1 or diff.days > 5:
-        return Response(status=400, response="Audience cannot be reserved for that period of time.")
+        return Response(status=400, response="Audience cannot be reserved for that period of time. d2 - d1 > 5")
 
     # Check if audience is available for given date
-    audience = session.query(Audience).filter_by(id=data['audience_id']).first()
-    if not audience.status:
-        return Response(status=400, response="Audience is not available now.")
-    reservations = session.query(Reservation).filter_by(audience_id=data['audience_id'])
-    flag = False
-    for r in reservations:
-        if (r.from_date <= d1 <= r.to_date) or (
-                r.from_date <= d2 <= r.to_date) or (
-                d1 <= r.from_date and d2 >= r.to_date):
-            flag = True
-            break
-    if flag:
-        return Response(status=400, response='Audience is already reserved for given time.')
+
+    all_reserved = session.query(Reservation).all()
+
+    dfrom = datetime.strptime(data['from_date'], '%Y-%m-%d %H:%M:%S')
+    dto = datetime.strptime(data['to_date'], '%Y-%m-%d %H:%M:%S')
+
+    for k in all_reserved:
+        if k.from_date <= dfrom <= k.to_date:
+            return {"message": "1. Class is already reserved for this time."}, 400
+        if k.from_date <= dto <= k.to_date:
+            return {"message": "2. Class is already reserved for this time."}, 400
+        if dfrom <= k.from_date and dto >= k.to_date:
+            return {"message": "3. Class is already reserved for this time."}, 400
 
     # Create new reservation
     new_reservation = Reservation(
@@ -120,7 +120,7 @@ def update_reservation(reservationId):
 
     # Validate input data
     try:
-        ReservatiobSchema().load(data)
+        ReservationSchema().load(data)
     except ValidationError as err:
         return jsonify(err.messages), 400
 
@@ -144,10 +144,10 @@ def update_reservation(reservationId):
         if d1 > d2:
             return Response(status=400, response="Invalid dates input.")
 
-        # Check if user wants to reserve audience for allowed period of time
-        diff = d2 - d1
-        if (diff.total_seconds() / 3600) < 1 or diff.days > 5:
-            return Response(status=400, response="Audience cannot be reserved for that period of time.")
+        # # Check if user wants to reserve audience for allowed period of time
+        # diff = d2 - d1
+        # if (diff.total_seconds() / 3600) < 1 or diff.days > 5:
+        #     return Response(status=400, response="Audience cannot be reserved for that period of time.")
 
         if 'audience_id' in data.keys():
             audience = session.query(Audience).filter_by(id=data['audience_id']).first()
@@ -157,25 +157,34 @@ def update_reservation(reservationId):
             return Response(status=400, response="Audience is not available now.")
         reservations = session.query(Reservation).filter_by(audience_id=audience.id)
         flag = False
-        for r in reservations:
-            if db_reservation.id != r.id:
-                if (r.from_date <= d1 <= r.to_date) or (
-                        r.from_date <= d2 <= r.to_date) or (
-                        d1 <= r.from_date and d2 >= r.to_date):
-                    flag = True
-                    break
-        if flag:
-            return Response(status=400, response='Audience is already reserved for given time.')
+
+        if datetime.strptime(data['from_date'], '%Y-%m-%d %H:%M:%S') > datetime.strptime(data['to_date'],
+                                                                                         '%Y-%m-%d %H:%M:%S'):
+            return {"message": "Invalid data input. "}
+
+        # for r in reservations:
+        #     if db_reservation.id != r.id:
+        #         if (r.from_date <= d1 <= r.to_date) or (
+        #                 r.from_date <= d2 <= r.to_date) or (
+        #                 d1 <= r.from_date and d2 >= r.to_date):
+        #             flag = True
+        #             break
+        # if flag:
+        #     return Response(status=400, response='Audience is already reserved for given time.')
 
     # Change reservation data
-    if 'audience_id' in data.keys():
-        db_reservation.audience_id = data['audience_id']
-    if 'title' in data.keys():
-        db_reservation.title = data['title']
-    if 'from_date' in data.keys():
-        db_reservation.from_date = data['from_date']
-    if 'to_date' in data.keys():
-        db_reservation.from_date = data['to_date']
+
+    for key, value in data.items():
+        setattr(db_reservation, key, value)
+
+    # if 'audience_id' in data.keys():
+    #     db_reservation.audience_id = data['audience_id']
+    # if 'title' in data.keys():
+    #     db_reservation.title = data['title']
+    # if 'from_date' in data.keys():
+    #     db_reservation.from_date = data['from_date']
+    # if 'to_date' in data.keys():
+    #     db_reservation.from_date = data['to_date']
 
     # Save changes
     session.commit()

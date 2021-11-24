@@ -3,13 +3,13 @@ from sqlalchemy import create_engine, Integer, String, Column, Date, ForeignKey,
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from sqlalchemy import Integer, String, Column, Date, ForeignKey
-
+from sqlalchemy.dialects.mysql import DATETIME
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine
 from sqlalchemy.orm import relationship, sessionmaker, scoped_session
 
 # engine = create_engine('mysql+pymysql://root:root@localhost:3306/mydb')
-engine = create_engine('mysql+pymysql://root:pass@localhost:3306/lab7_pp')
+engine = create_engine('mysql+pymysql://root:OlehSyniuk@localhost:3306/pp')
 
 SessionFactory = sessionmaker(bind=engine)
 
@@ -42,7 +42,7 @@ class Reservation(Base):
     user_id = Column(Integer, ForeignKey('user.id'))
     title = Column(String(45))
     audience_id = Column(Integer, ForeignKey('audience.id'))
-    from_date = Column(Date)
-    to_date = Column(Date)
+    from_date = Column(DATETIME)
+    to_date = Column(DATETIME)
     audience = relationship("Audience")
     user = relationship("User")

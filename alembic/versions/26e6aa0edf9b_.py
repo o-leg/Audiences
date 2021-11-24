@@ -1,16 +1,16 @@
 """empty message
 
-Revision ID: cf90799f50d2
+Revision ID: 26e6aa0edf9b
 Revises: 
-Create Date: 2021-11-11 11:05:46.007942
+Create Date: 2021-11-23 00:47:53.623263
 
 """
 from alembic import op
 import sqlalchemy as sa
-
+from sqlalchemy.dialects import mysql
 
 # revision identifiers, used by Alembic.
-revision = 'cf90799f50d2'
+revision = '26e6aa0edf9b'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -23,7 +23,6 @@ def upgrade():
     sa.Column('number', sa.Integer(), nullable=True),
     sa.Column('amount_of_places', sa.Integer(), nullable=True),
     sa.Column('status', sa.Boolean(), nullable=True),
-    sa.Column('reservuation_date', sa.Date(), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('user',
@@ -39,7 +38,8 @@ def upgrade():
     sa.Column('user_id', sa.Integer(), nullable=True),
     sa.Column('title', sa.String(length=45), nullable=True),
     sa.Column('audience_id', sa.Integer(), nullable=True),
-    sa.Column('date', sa.Date(), nullable=True),
+    sa.Column('from_date', mysql.DATETIME(), nullable=True),
+    sa.Column('to_date', mysql.DATETIME(), nullable=True),
     sa.ForeignKeyConstraint(['audience_id'], ['audience.id'], ),
     sa.ForeignKeyConstraint(['user_id'], ['user.id'], ),
     sa.PrimaryKeyConstraint('id')

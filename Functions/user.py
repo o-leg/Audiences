@@ -1,13 +1,42 @@
 from flask import Blueprint, Response, request, jsonify
 from marshmallow import ValidationError
-from flask_bcrypt import Bcrypt
-from models import User, Session
+#from flask_bcrypt import Bcrypt
+from models import User, Session, Reservation
 from validation_schemas import UserSchema
 
 user = Blueprint('user', __name__)
-bcrypt = Bcrypt()
+#bcrypt = Bcrypt()
 
 session = Session()
+
+
+# Create new user
+@user.route('/api/v1/user', methods=['POST'])
+def create_user():
+    # Get data from request body
+    data = request.get_json()
+
+    # Validate input data
+    try:
+        UserSchema().load(data)
+    except ValidationError as err:
+        return jsonify(err.messages), 400
+
+    # Check if user already exists
+    exists = session.query(User.username).filter_by(username=data['username']).first()
+    if exists:
+        return Response(status=400, response='User with such username already exists.')
+
+    # Create new user
+    new_user = User(name=data['name'], surname=data['surname'], username=data['username'], password=data['password'])
+
+    # Add new user to db
+    session.add(new_user)
+    session.commit()
+
+    return Response(response='New user was successfully created!')
+
+
 
 
 # Get user by id
@@ -70,6 +99,9 @@ def delete_user(userId):
     db_user = session.query(User).filter_by(id=userId).first()
     if not db_user:
         return Response(status=404, response='A user with provided ID was not found.')
+
+    # Delete user`s reservations
+    session.query(Reservation).filter_by(user_id=userId).delete(synchronize_session="fetch")
 
     # Delete user
     session.delete(db_user)

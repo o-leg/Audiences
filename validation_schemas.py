@@ -15,7 +15,7 @@ class AudienceSchema(Schema):
     status = fields.Integer(strict=True, validate=Range(min=0, max=1))
 
 
-class ReservatiobSchema(Schema):
+class ReservationSchema(Schema):
     user_id = fields.Integer(strict=True)
     audience_id = fields.Integer(strict=True)
     title = fields.String()
