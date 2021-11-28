@@ -2,13 +2,11 @@ __version__ = '0.1.0'
 
 from flask import Flask, Response
 
-from auth import auth
 from Functions.user import user
 from Functions.audience import audience
 from Functions.reservation import reservation
 
 app = Flask(__name__)
-app.register_blueprint(auth)
 app.register_blueprint(user)
 app.register_blueprint(audience)
 app.register_blueprint(reservation)
