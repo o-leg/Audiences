@@ -9,7 +9,9 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import relationship, sessionmaker, scoped_session
 
 # engine = create_engine('mysql+pymysql://root:root@localhost:3306/mydb')
-engine = create_engine('mysql+pymysql://root:OlehSyniuk@localhost:3306/pp')
+# engine = create_engine('mysql+pymysql://root:OlehSyniuk@localhost:3306/pp')
+engine = create_engine('mysql+pymysql://root:qwerty@localhost:3306/pp_lab_7')
+
 
 SessionFactory = sessionmaker(bind=engine)
 
@@ -25,7 +27,7 @@ class User(Base):
     name = Column(String(45))
     surname = Column(String(45))
     username = Column(String(45))
-    password = Column(String(45))
+    password = Column(String(200))
 
 
 class Audience(Base):

@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 26e6aa0edf9b
+Revision ID: 8d5ae7033e91
 Revises: 
-Create Date: 2021-11-23 00:47:53.623263
+Create Date: 2021-11-24 21:55:01.957618
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import mysql
 
 # revision identifiers, used by Alembic.
-revision = '26e6aa0edf9b'
+revision = '8d5ae7033e91'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -30,7 +30,7 @@ def upgrade():
     sa.Column('name', sa.String(length=45), nullable=True),
     sa.Column('surname', sa.String(length=45), nullable=True),
     sa.Column('username', sa.String(length=45), nullable=True),
-    sa.Column('password', sa.String(length=45), nullable=True),
+    sa.Column('password', sa.String(length=200), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('reservation',

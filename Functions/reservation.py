@@ -3,6 +3,7 @@ from marshmallow import ValidationError
 from datetime import datetime
 from models import Reservation, User, Audience, Session
 from validation_schemas import ReservationSchema
+from Functions.user import auth
 
 reservation = Blueprint('reservation', __name__)
 
@@ -11,6 +12,7 @@ session = Session()
 
 # Create new reservation
 @reservation.route('/api/v1/reservation', methods=['POST'])
+@auth.login_required
 def create_reservation():
     # Get data from request body
     data = request.get_json()
@@ -22,9 +24,12 @@ def create_reservation():
         return jsonify(err.messages), 400
 
     # Check if user already exists
-    exists = session.query(User.id).filter_by(id=data['user_id']).first()
+    exists = session.query(User).filter_by(id=data['user_id']).first()
     if not exists:
         return Response(status=404, response='User with such id was not found.')
+
+    if exists.username != auth.username():
+        return Response(status=404, response='You can create reservation only for yourself')
 
     # Check if audience already exists
     exists = session.query(Audience.id).filter_by(id=data['audience_id']).first()
@@ -76,6 +81,7 @@ def create_reservation():
 
 # Get all reservations
 @reservation.route('/api/v1/reservation', methods=['GET'])
+@auth.login_required
 def get_reservations():
     # Get all reservations from db
     reservations = session.query(Reservation)
@@ -94,6 +100,7 @@ def get_reservations():
 
 # Get reservation by id
 @reservation.route('/api/v1/reservation/<reservationId>', methods=['GET'])
+@auth.login_required
 def get_reservation(reservationId):
     # Check if reservation exists
     db_reservation = session.query(Reservation).filter_by(id=reservationId).first()
@@ -114,6 +121,7 @@ def get_reservation(reservationId):
 
 # Update reservation by id
 @reservation.route('/api/v1/reservation/<reservationId>', methods=['PUT'])
+@auth.login_required
 def update_reservation(reservationId):
     # Get data from request body
     data = request.get_json()
@@ -128,6 +136,10 @@ def update_reservation(reservationId):
     db_reservation = session.query(Reservation).filter_by(id=reservationId).first()
     if not db_reservation:
         return Response(status=404, response='A reservation with provided ID was not found.')
+
+    db_user = session.query(User).filter_by(id=db_reservation.user_id).first()
+    if auth.username() != db_user.username:
+        return Response(status=404, response='You can update only your own reservation')
 
     if 'from_date' in data.keys():
         d1 = datetime.strptime(data['from_date'], '%Y-%m-%d %H:%M:%S')
@@ -203,11 +215,16 @@ def update_reservation(reservationId):
 
 # Delete reservation by id
 @reservation.route('/api/v1/reservation/<reservationId>', methods=['DELETE'])
+@auth.login_required
 def delete_reservation(reservationId):
     # Check if reservation exists
     db_reservation = session.query(Reservation).filter_by(id=reservationId).first()
     if not db_reservation:
         return Response(status=404, response='A reservation with provided ID was not found.')
+
+    db_user = session.query(User).filter_by(id=db_reservation.user_id).first()
+    if auth.username() != db_user.username:
+        return Response(status=404, response='You can delete only your own reservation')
 
     # Delete audience
     session.delete(db_reservation)
@@ -217,9 +234,14 @@ def delete_reservation(reservationId):
 
 # Get all reservations for user with provided id
 @reservation.route('/api/v1/reservation/user_id/<userId>', methods=['GET'])
+@auth.login_required
 def get_reservations_by_userId(userId):
     # Get all user's reservations from db
     reservations = session.query(Reservation).filter_by(user_id=userId)
+
+    db_user = session.query(User).filter_by(id=userId).first()
+    if auth.username() != db_user.username:
+        return Response(status=404, response='You can get only your reservations')
 
     # Return all reservations
     output = []
@@ -235,11 +257,14 @@ def get_reservations_by_userId(userId):
 
 # Get all reservations for user with provided username
 @reservation.route('/api/v1/reservation/username/<username>', methods=['GET'])
+@auth.login_required
 def get_reservations_by_username(username):
     # Check if user exists
     user = session.query(User).filter_by(username=username).first()
     if not user:
         return Response(status=404, response='User with such username was not found.')
+    if auth.username() != username:
+        return Response(status=404, response='You can get only your reservations')
 
     # Get all user's reservations from db
     reservations = session.query(Reservation).filter_by(user_id=user.id)

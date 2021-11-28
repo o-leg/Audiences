@@ -3,10 +3,7 @@ info:
   title: Лабораторна робота варіант 7
   description: >-
     Створити сервіс для резервування аудиторій на певну дату час та проміжок
-    часу від 1 години до 5 днів. Користувачі мають можливість резервувати
-    аудиторії, а також редагувати, скасовувати та видаляти їх. Застерегти
-    користувачів від накладок (два користувачі не можуть зарезервувати аудиторію
-    на певний період час)..
+    часу від 1 години до 5 днів.
   version: 1.0.0
 servers:
   - url: http://127.0.0.0:5000/api/v1
@@ -17,14 +14,12 @@ tags:
     description: operations with reservations
   - name: user
     description: operations with users
-  - name: auth
-    description: authenticating operations
 paths:
 
-  /auth/register:
+  /user/register:
     post:
       tags:
-        - auth
+        - user
       summary: Register new user
       operationId: registerUser
       parameters:
@@ -70,10 +65,10 @@ paths:
           description: User with such username already exists
           
           
-  /auth/login:
+  /user/login:
     post:
       tags:
-      - auth
+      - user
       summary: Log in for existing user
       operationId: loginUser
       parameters:
@@ -101,10 +96,10 @@ paths:
         401:
           $ref: '#/components/responses/InputDataError'
           
-  /auth/logout:
+  /user/logout:
     post:
       tags:
-      - auth
+      - user
       summary: Log out of current user
       operationId: logoutUser
       responses:
